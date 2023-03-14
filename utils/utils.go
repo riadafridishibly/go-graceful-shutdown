@@ -21,3 +21,12 @@ func SimulateSendSignal(after time.Duration, sig os.Signal) {
 		}
 	}()
 }
+
+func BlockingFunc() (string, error) {
+	n := 5 * time.Second
+	fmt.Printf("Blocking func started, will sleep for %v\n", n)
+	defer fmt.Println("Blocking func finished")
+
+	time.Sleep(n)
+	return "foo bar baz", nil
+}

@@ -8,22 +8,9 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/riadafridishibly/go-graceful-shutdown/utils"
 )
-
-// const str1 = "v1 v2 v3 v4 v5 v6"
-// const str2 = "x1 x2 x3 x4 x5 x6"
-
-// func splitString(s string) <-chan string {
-// 	ch := make(chan string)
-// 	go func() {
-// 		defer close(ch)
-// 		for _, v := range strings.Fields(s) {
-// 			ch <- v
-// 			time.Sleep(1 * time.Second)
-// 		}
-// 	}()
-// 	return ch
-// }
 
 func splitStringDone(s string, done <-chan bool) <-chan string {
 	ch := make(chan string)
@@ -54,9 +41,11 @@ func printer(name string, ch <-chan string, wg *sync.WaitGroup) {
 }
 
 func main() {
-	fmt.Println("Process PID:", os.Getpid())
+	fmt.Println("PID:", os.Getpid())
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+
+	utils.SimulateSendSignal(2*time.Second, os.Interrupt)
 
 	done := make(chan bool)
 	go func() {
@@ -80,7 +69,8 @@ func main() {
 
 	fmt.Println("Exited!")
 
-	// Print the goroutine stack trace
+	// Print the goroutine stack trace,
+	// to check which goroutines are currently alive
 	// debug.SetTraceback("all")
 	// panic("show me the stacks")
 }

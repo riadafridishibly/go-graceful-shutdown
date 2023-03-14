@@ -7,15 +7,9 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/riadafridishibly/go-graceful-shutdown/utils"
 )
-
-func blockingFunc() (string, error) {
-	fmt.Println("Blocking func started, will sleep for 5 sec")
-	defer fmt.Println("Blocking func finished")
-
-	time.Sleep(5 * time.Second)
-	return "some value", nil
-}
 
 func responsive(done <-chan bool) (string, error) {
 	type result struct {
@@ -24,7 +18,7 @@ func responsive(done <-chan bool) (string, error) {
 	}
 	ch := make(chan result)
 	go func() {
-		v, err := blockingFunc()
+		v, err := utils.BlockingFunc()
 		ch <- result{v, err}
 	}()
 	select {
@@ -38,6 +32,8 @@ func responsive(done <-chan bool) (string, error) {
 func main() {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
+
+	utils.SimulateSendSignal(1*time.Second, os.Interrupt)
 
 	done := make(chan bool)
 	go func() {
